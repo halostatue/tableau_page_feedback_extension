@@ -243,7 +243,7 @@ defmodule TableauPageFeedbackExtension do
         items = Map.get(token, collection, []),
         %{permalink: permalink, feedback_urls: urls} <- items,
         into: %{} do
-      {permalink, urls}
+      {permalink, Map.new(urls, fn {k, v} -> {to_string(k), v} end)}
     end
   end
 
@@ -253,14 +253,40 @@ defmodule TableauPageFeedbackExtension do
         page
 
       urls ->
-        body =
-          Enum.reduce(urls, page.body, fn {type, url}, body ->
-            String.replace(body, "$feedback:#{type}", url)
-          end)
+        case Floki.parse_document(page.body) do
+          {:ok, html} ->
+            body =
+              html
+              |> Floki.traverse_and_update(&replace_marker(&1, urls))
+              |> Floki.raw_html()
 
-        put_in(page.body, body)
+            put_in(page.body, body)
+
+          {:error, reason} ->
+            Logger.warning("Failed to parse HTML for page #{page.permalink}: #{inspect(reason)}")
+
+            page
+        end
     end
   end
+
+  defp replace_marker({"a", attrs, children}, urls) do
+    attrs =
+      Enum.map(attrs, fn
+        {"href", "$feedback:" <> type} ->
+          case Map.get(urls, type) do
+            nil -> {"href", "$feedback:" <> type}
+            url -> {"href", url}
+          end
+
+        attr ->
+          attr
+      end)
+
+    {"a", attrs, children}
+  end
+
+  defp replace_marker(node, _urls), do: node
 
   defp validate(config) do
     with :ok <- validate_repo(config.repo),

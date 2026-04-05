@@ -3,7 +3,7 @@ defmodule TableauPageFeedbackExtension.MixProject do
 
   @app :tableau_page_feedback_extension
   @project_url "https://github.com/halostatue/tableau_page_feedback_extension"
-  @version "1.0.0"
+  @version "1.0.1"
 
   def project do
     [
@@ -63,6 +63,7 @@ defmodule TableauPageFeedbackExtension.MixProject do
 
   defp deps do
     [
+      {:floki, "~> 0.36"},
       {:tableau, "~> 0.30"},
       {:castore, "~> 1.0", optional: true},
       {:credo, "~> 1.0", only: [:dev, :test], runtime: false},
