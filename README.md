@@ -18,7 +18,7 @@ Add `tableau_page_feedback_extension` to your dependencies in `mix.exs`:
 ```elixir
 def deps do
   [
-    {:tableau_page_feedback_extension, "~> 0.1"}
+    {:tableau_page_feedback_extension, "~> 1.0"}
   ]
 end
 ```
@@ -30,7 +30,9 @@ config :tableau, TableauPageFeedbackExtension,
   enabled: true,
   forge: :github,
   repo: "owner/repo",
-  discussion_category: "General"
+  github: [
+    discussion: [category: "General"]
+  ]
 ```
 
 ### Options
@@ -39,8 +41,17 @@ config :tableau, TableauPageFeedbackExtension,
 - `:repo` (required) — Repository slug (`"owner/repo"`).
 - `:host` — Override the forge host. Defaults to `"github.com"`.
 - `:title_prefix` — String prepended to the page title in the feedback title.
-- `:body` — Additional text appended after the page URL in the feedback body.
-- `:discussion_category` — GitHub Discussions category name.
+- `:body_suffix` — Additional text appended after the page URL in the feedback body.
+
+### Forge-Specific Configuration
+
+Forge-specific options are nested under the forge key. Types with missing
+required config are disabled with a warning.
+
+#### GitHub (`:github`)
+
+- `:issue` — No additional configuration. Enabled by default.
+- `:discussion` — Requires `:category` (the GitHub Discussions category name).
 
 ### Feedback Types by Forge
 
